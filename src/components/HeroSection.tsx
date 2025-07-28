@@ -44,7 +44,7 @@ const HeroSection = () => {
               onClick={() => navigate('/auth')}
               size="lg" 
               variant="outline" 
-              className="border-2 border-white text-yellow-600 hover:bg-white hover:text-teal-800 px-8 py-4 text-lg font-semibold rounded-full shadow-2xl transform hover:scale-110 transition-all duration-300 backdrop-blur-sm"
+              className="border-2 border-white text-slate-800 hover:bg-white hover:text-teal-800 px-8 py-4 text-lg font-semibold rounded-full shadow-2xl transform hover:scale-110 transition-all duration-300 backdrop-blur-sm"
             >
               <Gift className="w-5 h-5 mr-2" />
               Приєднатися зараз
