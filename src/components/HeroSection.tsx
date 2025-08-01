@@ -58,7 +58,7 @@ const HeroSection = () => {
             </Button>
             
             <Button 
-              onClick={() => user ? navigate('/profile?tab=wallet') : navigate('/auth')}
+              onClick={() => user ? navigate('/profile?tab=wallet') : navigate('/auth?tab=signup')}
               size="lg" 
               variant="outline" 
               className="border-2 border-white text-slate-800 hover:bg-white hover:text-teal-800 px-8 py-4 text-lg font-semibold rounded-full shadow-2xl transform hover:scale-110 transition-all duration-300 backdrop-blur-sm"
