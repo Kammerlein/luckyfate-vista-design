@@ -55,11 +55,15 @@ const Profile = () => {
         .from('profiles')
         .select('balance, display_name, avatar_url')
         .eq('user_id', session.user.id)
-        .single();
+        .maybeSingle();
       
       if (profileData) {
         setProfile(profileData);
         setDisplayName(profileData.display_name || session.user.email || '');
+        console.log('Profile data:', profileData); // Debug log
+        console.log('Avatar URL from profile:', profileData.avatar_url); // Debug log
+      } else {
+        console.log('No profile data found'); // Debug log
       }
       
       // Fetch user tickets
