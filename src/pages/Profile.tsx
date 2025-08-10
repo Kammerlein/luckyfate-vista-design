@@ -16,6 +16,7 @@ import type { User as SupabaseUser } from '@supabase/supabase-js';
 interface UserProfile {
   balance: number;
   display_name: string | null;
+  avatar_url: string | null;
 }
 
 interface UserTicket {
@@ -52,7 +53,7 @@ const Profile = () => {
       // Fetch user profile
       const { data: profileData } = await supabase
         .from('profiles')
-        .select('balance, display_name')
+        .select('balance, display_name, avatar_url')
         .eq('user_id', session.user.id)
         .single();
       
@@ -155,7 +156,7 @@ const Profile = () => {
                 {/* Avatar Section */}
                 <div className="relative group">
                   <Avatar className="w-32 h-32 border-4 border-yellow-400 shadow-2xl">
-                    <AvatarImage src={user.user_metadata?.avatar_url} />
+                    <AvatarImage src={profile?.avatar_url || user.user_metadata?.avatar_url} />
                     <AvatarFallback className="bg-gradient-to-br from-yellow-400 to-amber-500 text-white text-2xl font-bold">
                       {getInitials(user.email || '')}
                     </AvatarFallback>
