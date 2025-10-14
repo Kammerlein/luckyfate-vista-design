@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { supabase } from '@/integrations/supabase/client';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import Header from '@/components/Header';
 import { toast } from 'sonner';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
@@ -44,6 +44,7 @@ interface UserListing {
 
 const Profile = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [tickets, setTickets] = useState<UserTicket[]>([]);
@@ -66,7 +67,10 @@ const Profile = () => {
   });
   const [uploadingListing, setUploadingListing] = useState(false);
   const listingImageRef = useRef<HTMLInputElement>(null);
-  const [activeTab, setActiveTab] = useState('overview');
+  
+  // Get tab from URL parameter, default to 'overview'
+  const tabFromUrl = searchParams.get('tab') || 'overview';
+  const [activeTab, setActiveTab] = useState(tabFromUrl);
 
   useEffect(() => {
     const fetchUserData = async () => {
