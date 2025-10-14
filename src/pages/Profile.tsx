@@ -430,7 +430,7 @@ const Profile = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-teal-950">
       <Header />
       
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-1 py-2">
         <div className="max-w-4xl mx-auto">
           
           {/* Profile Header */}
