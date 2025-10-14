@@ -630,6 +630,54 @@ const Profile = () => {
                     Всі ваші придбані квитки та їх статус
                   </CardDescription>
                 </CardHeader>
+                <CardContent>
+                  {tickets.length > 0 ? (
+                    <div className="space-y-4">
+                      {tickets.map((ticket) => (
+                        <div key={ticket.id} className="p-4 bg-slate-700/50 rounded-lg">
+                          <div className="flex justify-between items-start mb-2">
+                            <div>
+                              <h4 className="text-white font-semibold">{ticket.lottery.title}</h4>
+                              <p className="text-slate-400 text-sm">Категорія: {ticket.lottery.category}</p>
+                            </div>
+                            <span className="text-green-400 font-bold">{ticket.price_paid} ₴</span>
+                          </div>
+                          <p className="text-slate-300 text-sm">Номер квитка: {ticket.ticket_number}</p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-slate-400">
+                      Квитків поки немає. Придбайте перший квиток!
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Listings Tab */}
+            <TabsContent value="listings">
+              <Card className="bg-slate-800/50 border-slate-700">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-white flex items-center gap-2">
+                        <Package className="w-5 h-5" />
+                        Ваші оголошення
+                      </CardTitle>
+                      <CardDescription className="text-slate-400">
+                        Додавайте та керуйте своїми товарами
+                      </CardDescription>
+                    </div>
+                    <Button
+                      onClick={() => setShowAddListing(!showAddListing)}
+                      className="bg-yellow-500 hover:bg-yellow-600 text-black"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Додати товар
+                    </Button>
+                  </div>
+                </CardHeader>
                 <CardContent className="space-y-4">
                   {/* Add/Edit Listing Form */}
                   {showAddListing && (
@@ -795,54 +843,6 @@ const Profile = () => {
                       <p className="text-sm">Натисніть кнопку "Додати товар" щоб створити перше оголошення</p>
                     </div>
                   ) : null}
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            {/* Listings Tab */}
-            <TabsContent value="listings">
-              <Card className="bg-slate-800/50 border-slate-700">
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle className="text-white flex items-center gap-2">
-                        <Package className="w-5 h-5" />
-                        Ваші оголошення
-                      </CardTitle>
-                      <CardDescription className="text-slate-400">
-                        Додавайте та керуйте своїми товарами
-                      </CardDescription>
-                    </div>
-                    <Button
-                      onClick={() => setShowAddListing(!showAddListing)}
-                      className="bg-yellow-500 hover:bg-yellow-600 text-black"
-                    >
-                      <Plus className="w-4 h-4 mr-2" />
-                      Додати товар
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  {tickets.length > 0 ? (
-                    <div className="space-y-4">
-                      {tickets.map((ticket) => (
-                        <div key={ticket.id} className="p-4 bg-slate-700/50 rounded-lg">
-                          <div className="flex justify-between items-start mb-2">
-                            <div>
-                              <h4 className="text-white font-semibold">{ticket.lottery.title}</h4>
-                              <p className="text-slate-400 text-sm">Категорія: {ticket.lottery.category}</p>
-                            </div>
-                            <span className="text-green-400 font-bold">{ticket.price_paid} ₴</span>
-                          </div>
-                          <p className="text-slate-300 text-sm">Номер квитка: {ticket.ticket_number}</p>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-8 text-slate-400">
-                      Квитків поки немає. Придбайте перший квиток!
-                    </div>
-                  )}
                 </CardContent>
               </Card>
             </TabsContent>
