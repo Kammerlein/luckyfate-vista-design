@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Wallet, User, Home, Ticket, Trophy, LogOut, LogIn } from 'lucide-react';
+import { Wallet, User, Home, Ticket, Trophy, LogOut, LogIn, Archive } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -112,6 +112,15 @@ const Header = () => {
               >
                 <Ticket className="w-4 h-4" />
                 <span>Мої квитки</span>
+              </button>
+            )}
+            {user && location.pathname === '/profile' && (
+              <button 
+                onClick={() => navigate('/profile?tab=archive')}
+                className="text-white hover:text-yellow-400 transition-all duration-300 font-medium flex items-center space-x-2 hover:scale-105"
+              >
+                <Archive className="w-4 h-4" />
+                <span>Архів оголошень</span>
               </button>
             )}
           </nav>
