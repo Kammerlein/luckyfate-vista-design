@@ -66,6 +66,7 @@ const Profile = () => {
   });
   const [uploadingListing, setUploadingListing] = useState(false);
   const listingImageRef = useRef<HTMLInputElement>(null);
+  const [activeTab, setActiveTab] = useState('overview');
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -546,7 +547,7 @@ const Profile = () => {
           </Card>
 
           {/* Profile Tabs */}
-          <Tabs defaultValue="overview" className="space-y-6">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <TabsList className="grid w-full grid-cols-5 bg-slate-800/50 border border-slate-700">
               <TabsTrigger value="overview" className="text-white data-[state=active]:bg-yellow-500 data-[state=active]:text-black">
                 Огляд
@@ -863,7 +864,10 @@ const Profile = () => {
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Button className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold py-6">
+                    <Button 
+                      onClick={() => setActiveTab('wallet')}
+                      className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold py-6"
+                    >
                       <CreditCard className="w-5 h-5 mr-2" />
                       Поповнити рахунок
                     </Button>
