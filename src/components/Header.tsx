@@ -116,7 +116,7 @@ const Header = () => {
             )}
             {user && location.pathname === '/profile' && (
               <button 
-                onClick={() => navigate('/profile?tab=archive')}
+                onClick={() => navigate('/archive')}
                 className="text-white hover:text-yellow-400 transition-all duration-300 font-medium flex items-center space-x-2 hover:scale-105"
               >
                 <Archive className="w-4 h-4" />

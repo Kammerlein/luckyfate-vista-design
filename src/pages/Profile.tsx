@@ -125,11 +125,12 @@ const Profile = () => {
         })));
       }
       
-      // Fetch user listings
+      // Fetch user listings (only active ones)
       const { data: listingsData } = await supabase
         .from('user_listings')
         .select('*')
         .eq('user_id', session.user.id)
+        .eq('status', 'active')
         .order('created_at', { ascending: false });
       
       if (listingsData) {
@@ -400,16 +401,17 @@ const Profile = () => {
     if (!user || !confirm('Ви впевнені, що хочете видалити це оголошення?')) return;
 
     try {
+      // Move to archive instead of deleting
       const { error } = await supabase
         .from('user_listings')
-        .delete()
+        .update({ status: 'deleted' })
         .eq('id', id)
         .eq('user_id', user.id);
 
       if (error) throw error;
 
       setListings(prev => prev.filter(listing => listing.id !== id));
-      toast.success('Оголошення видалено!');
+      toast.success('Оголошення переміщено в архів!');
     } catch (error) {
       console.error('Error deleting listing:', error);
       toast.error('Помилка при видаленні оголошення');
