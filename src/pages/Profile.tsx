@@ -402,11 +402,14 @@ const Profile = () => {
 
     try {
       // Move to archive instead of deleting
-      const { error } = await supabase
-        .from('user_listings')
-        .update({ status: 'deleted' })
-        .eq('id', id)
-        .eq('user_id', user.id);
+    const { error } = await supabase
+      .from('user_listings')
+      .update({ 
+        status: 'deleted',
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .eq('user_id', user.id);
 
       if (error) throw error;
 
