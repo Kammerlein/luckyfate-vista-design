@@ -16,6 +16,7 @@ import type { User as SupabaseUser } from '@supabase/supabase-js';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { LotteryPromptDialog } from '@/components/LotteryPromptDialog';
+import { profileSchema, listingSchema } from '@/lib/validation';
 
 interface UserProfile {
   balance: number;
@@ -241,7 +242,10 @@ const Profile = () => {
       toast.success('Аватар успішно оновлено!');
 
     } catch (error) {
-      console.error('Error uploading avatar:', error);
+      // Only log in development
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error uploading avatar:', error);
+      }
       toast.error('Помилка при завантаженні аватара');
     } finally {
       setUploadingAvatar(false);
@@ -293,17 +297,22 @@ const Profile = () => {
   const handleSaveListing = async () => {
     if (!user) return;
     
-    // Validation
-    if (!listingForm.title.trim() || !listingForm.price || !listingForm.category) {
-      toast.error('Заповніть всі обов\'язкові поля');
+    // Validate with zod schema
+    const validationResult = listingSchema.safeParse({
+      title: listingForm.title,
+      description: listingForm.description || '',
+      price: parseFloat(listingForm.price),
+      category: listingForm.category,
+      image: listingForm.image ? URL.createObjectURL(listingForm.image) : ''
+    });
+
+    if (!validationResult.success) {
+      const firstError = validationResult.error.errors[0];
+      toast.error(firstError.message);
       return;
     }
 
-    const price = parseFloat(listingForm.price);
-    if (isNaN(price) || price <= 0) {
-      toast.error('Введіть коректну ціну');
-      return;
-    }
+    const { title, description, price, category } = validationResult.data;
 
     setUploadingListing(true);
 
@@ -332,10 +341,10 @@ const Profile = () => {
       if (editingListing) {
         // Update existing listing
         const updateData: any = {
-          title: listingForm.title,
-          description: listingForm.description,
+          title,
+          description,
           price,
-          category: listingForm.category
+          category
         };
         
         if (imageUrl) {
@@ -363,10 +372,10 @@ const Profile = () => {
           .from('user_listings')
           .insert({
             user_id: user.id,
-            title: listingForm.title,
-            description: listingForm.description,
+            title,
+            description,
             price,
-            category: listingForm.category,
+            category,
             image: imageUrl
           })
           .select()
@@ -385,7 +394,10 @@ const Profile = () => {
 
       resetListingForm();
     } catch (error) {
-      console.error('Error saving listing:', error);
+      // Only log in development
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error saving listing:', error);
+      }
       toast.error('Помилка при збереженні оголошення');
     } finally {
       setUploadingListing(false);
@@ -423,7 +435,10 @@ const Profile = () => {
       setListings(prev => prev.filter(listing => listing.id !== id));
       toast.success('Оголошення переміщено в архів!');
     } catch (error) {
-      console.error('Error deleting listing:', error);
+      // Only log in development
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error deleting listing:', error);
+      }
       toast.error('Помилка при видаленні оголошення');
     }
   };

@@ -26,17 +26,20 @@ const MarketplaceSection = () => {
 
   const fetchProducts = async () => {
     try {
+      // Use public_listings view to protect user privacy
       const { data, error } = await supabase
-        .from('user_listings')
+        .from('public_listings')
         .select('*')
-        .eq('status', 'active')
         .order('created_at', { ascending: false })
         .limit(8);
 
       if (error) throw error;
       setProducts(data || []);
     } catch (error: any) {
-      console.error('Error fetching products:', error);
+      // Only log in development
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error fetching products:', error);
+      }
       toast({
         title: "Помилка",
         description: "Не вдалося завантажити товари",
