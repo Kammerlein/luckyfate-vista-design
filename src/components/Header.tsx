@@ -53,6 +53,10 @@ const Header = () => {
           fetchUserBalance(session.user.id);
         } else {
           setBalance(0);
+          // If session is null and user is not already on auth page, redirect to auth
+          if (!session && location.pathname !== '/auth') {
+            navigate('/auth');
+          }
         }
       }
     );
