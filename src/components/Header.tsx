@@ -1,14 +1,13 @@
 
 import React, { useState, useEffect } from 'react';
-import { Wallet, User, Home, Ticket, Trophy, LogOut, LogIn, Archive } from 'lucide-react';
+import { Wallet, User, Home, Ticket, Trophy, LogOut, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 const Header = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [balance, setBalance] = useState<number>(0);
 
@@ -114,15 +113,6 @@ const Header = () => {
                 <span>Мої квитки</span>
               </button>
             )}
-            {user && location.pathname === '/profile' && (
-              <button 
-                onClick={() => navigate('/archive')}
-                className="text-white hover:text-yellow-400 transition-all duration-300 font-medium flex items-center space-x-2 hover:scale-105"
-              >
-                <Archive className="w-4 h-4" />
-                <span>Архів оголошень</span>
-              </button>
-            )}
           </nav>
 
           {/* User Section */}
@@ -136,15 +126,13 @@ const Header = () => {
             </div>
             
             {/* Profile Button */}
-            {location.pathname !== '/profile' && (
-              <Button 
-                onClick={() => navigate(user ? '/profile' : '/auth')}
-                className="bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white px-6 py-2 rounded-full font-semibold shadow-lg transform hover:scale-105 transition-all duration-300"
-              >
-                <User className="w-4 h-4 mr-2" />
-                Профіль
-              </Button>
-            )}
+            <Button 
+              onClick={() => navigate(user ? '/profile' : '/auth')}
+              className="bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white px-6 py-2 rounded-full font-semibold shadow-lg transform hover:scale-105 transition-all duration-300"
+            >
+              <User className="w-4 h-4 mr-2" />
+              Профіль
+            </Button>
             
             {/* Login/Logout Button */}
             <Button 

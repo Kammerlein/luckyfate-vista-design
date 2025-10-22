@@ -5,13 +5,12 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Eye, EyeOff, ArrowLeft, Mail, Lock, User, Trophy } from 'lucide-react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 const Auth = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -20,9 +19,6 @@ const Auth = () => {
     password: '',
     name: ''
   });
-
-  // Get tab from URL parameter, default to signin
-  const defaultTab = searchParams.get('tab') === 'signup' ? 'signup' : 'signin';
 
   useEffect(() => {
     // Check if user is already logged in
@@ -182,7 +178,7 @@ const Auth = () => {
         </div>
 
         <Card className="backdrop-blur-lg bg-white/10 border-white/20 shadow-2xl">
-          <Tabs defaultValue={defaultTab} className="w-full">
+          <Tabs defaultValue="signin" className="w-full">
             <TabsList className="grid w-full grid-cols-2 bg-white/10 backdrop-blur-sm">
               <TabsTrigger value="signin" className="data-[state=active]:bg-white/20 data-[state=active]:text-white text-teal-200">
                 Вхід

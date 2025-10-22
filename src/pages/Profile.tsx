@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { User, Settings, Wallet, Gift, Trophy, Camera, Edit3, Save, X, CreditCard, History, Upload, Package, Plus, Pencil, Trash2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { User, Settings, Wallet, Gift, Trophy, Camera, Edit3, Save, X, CreditCard, History } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -9,17 +9,13 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { supabase } from '@/integrations/supabase/client';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
-import { toast } from 'sonner';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface UserProfile {
   balance: number;
   display_name: string | null;
-  avatar_url: string | null;
 }
 
 interface UserTicket {
@@ -32,45 +28,14 @@ interface UserTicket {
   };
 }
 
-interface UserListing {
-  id: string;
-  title: string;
-  description: string | null;
-  price: number;
-  category: string;
-  image: string | null;
-  created_at: string;
-}
-
 const Profile = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [tickets, setTickets] = useState<UserTicket[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [displayName, setDisplayName] = useState('');
   const [loading, setLoading] = useState(true);
-  const [uploadingAvatar, setUploadingAvatar] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  
-  // User listings state
-  const [listings, setListings] = useState<UserListing[]>([]);
-  const [showAddListing, setShowAddListing] = useState(false);
-  const [editingListing, setEditingListing] = useState<string | null>(null);
-  const [listingForm, setListingForm] = useState({
-    title: '',
-    description: '',
-    price: '',
-    category: '',
-    image: null as File | null
-  });
-  const [uploadingListing, setUploadingListing] = useState(false);
-  const listingImageRef = useRef<HTMLInputElement>(null);
-  
-  // Get tab from URL parameter, default to 'overview'
-  const tabFromUrl = searchParams.get('tab') || 'overview';
-  const [activeTab, setActiveTab] = useState(tabFromUrl);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -87,17 +52,13 @@ const Profile = () => {
       // Fetch user profile
       const { data: profileData } = await supabase
         .from('profiles')
-        .select('balance, display_name, avatar_url')
+        .select('balance, display_name')
         .eq('user_id', session.user.id)
-        .maybeSingle();
+        .single();
       
       if (profileData) {
         setProfile(profileData);
         setDisplayName(profileData.display_name || session.user.email || '');
-        console.log('Profile data:', profileData); // Debug log
-        console.log('Avatar URL from profile:', profileData.avatar_url); // Debug log
-      } else {
-        console.log('No profile data found'); // Debug log
       }
       
       // Fetch user tickets
@@ -123,18 +84,6 @@ const Profile = () => {
             category: ticket.lotteries?.category || 'Невідома категорія'
           }
         })));
-      }
-      
-      // Fetch user listings (only active ones)
-      const { data: listingsData } = await supabase
-        .from('user_listings')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .eq('status', 'active')
-        .order('created_at', { ascending: false });
-      
-      if (listingsData) {
-        setListings(listingsData);
       }
       
       setLoading(false);
@@ -176,251 +125,6 @@ const Profile = () => {
     return email.substring(0, 2).toUpperCase();
   };
 
-  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file || !user) return;
-
-    // Validate file type
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-    if (!allowedTypes.includes(file.type)) {
-      toast.error('Будь ласка, оберіть зображення у форматі JPG, PNG або WebP');
-      return;
-    }
-
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Розмір файлу не повинен перевищувати 5MB');
-      return;
-    }
-
-    setUploadingAvatar(true);
-
-    try {
-      // Delete old avatar if exists
-      if (profile?.avatar_url) {
-        const oldPath = profile.avatar_url.split('/').pop();
-        if (oldPath) {
-          await supabase.storage
-            .from('avatars')
-            .remove([`${user.id}/${oldPath}`]);
-        }
-      }
-
-      // Upload new avatar
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}.${fileExt}`;
-      const filePath = `${user.id}/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, file);
-
-      if (uploadError) {
-        throw uploadError;
-      }
-
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(filePath);
-
-      // Update profile with new avatar URL
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({ avatar_url: publicUrl })
-        .eq('user_id', user.id);
-
-      if (updateError) {
-        throw updateError;
-      }
-
-      // Update local state
-      setProfile(prev => prev ? { ...prev, avatar_url: publicUrl } : null);
-      toast.success('Аватар успішно оновлено!');
-
-    } catch (error) {
-      console.error('Error uploading avatar:', error);
-      toast.error('Помилка при завантаженні аватара');
-    } finally {
-      setUploadingAvatar(false);
-      // Reset file input
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-    }
-  };
-
-  const triggerFileInput = () => {
-    fileInputRef.current?.click();
-  };
-
-  // Listing functions
-  const resetListingForm = () => {
-    setListingForm({
-      title: '',
-      description: '',
-      price: '',
-      category: '',
-      image: null
-    });
-    setShowAddListing(false);
-    setEditingListing(null);
-    if (listingImageRef.current) {
-      listingImageRef.current.value = '';
-    }
-  };
-
-  const handleListingImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      // Validate file type
-      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-      if (!allowedTypes.includes(file.type)) {
-        toast.error('Оберіть зображення у форматі JPG, PNG або WebP');
-        return;
-      }
-      // Validate file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error('Розмір файлу не повинен перевищувати 5MB');
-        return;
-      }
-      setListingForm(prev => ({ ...prev, image: file }));
-    }
-  };
-
-  const handleSaveListing = async () => {
-    if (!user) return;
-    
-    // Validation
-    if (!listingForm.title.trim() || !listingForm.price || !listingForm.category) {
-      toast.error('Заповніть всі обов\'язкові поля');
-      return;
-    }
-
-    const price = parseFloat(listingForm.price);
-    if (isNaN(price) || price <= 0) {
-      toast.error('Введіть коректну ціну');
-      return;
-    }
-
-    setUploadingListing(true);
-
-    try {
-      let imageUrl = null;
-
-      // Upload image if provided
-      if (listingForm.image) {
-        const fileExt = listingForm.image.name.split('.').pop();
-        const fileName = `${Date.now()}.${fileExt}`;
-        const filePath = `${user.id}/${fileName}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from('avatars')
-          .upload(filePath, listingForm.image);
-
-        if (uploadError) throw uploadError;
-
-        const { data: { publicUrl } } = supabase.storage
-          .from('avatars')
-          .getPublicUrl(filePath);
-
-        imageUrl = publicUrl;
-      }
-
-      if (editingListing) {
-        // Update existing listing
-        const updateData: any = {
-          title: listingForm.title,
-          description: listingForm.description,
-          price,
-          category: listingForm.category
-        };
-        
-        if (imageUrl) {
-          updateData.image = imageUrl;
-        }
-
-        const { error } = await supabase
-          .from('user_listings')
-          .update(updateData)
-          .eq('id', editingListing)
-          .eq('user_id', user.id);
-
-        if (error) throw error;
-
-        setListings(prev => prev.map(listing => 
-          listing.id === editingListing 
-            ? { ...listing, ...updateData } 
-            : listing
-        ));
-
-        toast.success('Оголошення оновлено!');
-      } else {
-        // Create new listing
-        const { data, error } = await supabase
-          .from('user_listings')
-          .insert({
-            user_id: user.id,
-            title: listingForm.title,
-            description: listingForm.description,
-            price,
-            category: listingForm.category,
-            image: imageUrl
-          })
-          .select()
-          .single();
-
-        if (error) throw error;
-
-        setListings(prev => [data, ...prev]);
-        toast.success('Оголошення додано!');
-      }
-
-      resetListingForm();
-    } catch (error) {
-      console.error('Error saving listing:', error);
-      toast.error('Помилка при збереженні оголошення');
-    } finally {
-      setUploadingListing(false);
-    }
-  };
-
-  const handleEditListing = (listing: UserListing) => {
-    setListingForm({
-      title: listing.title,
-      description: listing.description || '',
-      price: listing.price.toString(),
-      category: listing.category,
-      image: null
-    });
-    setEditingListing(listing.id);
-    setShowAddListing(true);
-  };
-
-  const handleDeleteListing = async (id: string) => {
-    if (!user || !confirm('Ви впевнені, що хочете видалити це оголошення?')) return;
-
-    try {
-      // Move to archive instead of deleting
-    const { error } = await supabase
-      .from('user_listings')
-      .update({ 
-        status: 'deleted',
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', id)
-      .eq('user_id', user.id);
-
-      if (error) throw error;
-
-      setListings(prev => prev.filter(listing => listing.id !== id));
-      toast.success('Оголошення переміщено в архів!');
-    } catch (error) {
-      console.error('Error deleting listing:', error);
-      toast.error('Помилка при видаленні оголошення');
-    }
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-teal-950">
@@ -451,32 +155,16 @@ const Profile = () => {
                 {/* Avatar Section */}
                 <div className="relative group">
                   <Avatar className="w-32 h-32 border-4 border-yellow-400 shadow-2xl">
-                    <AvatarImage src={profile?.avatar_url || user.user_metadata?.avatar_url} />
+                    <AvatarImage src={user.user_metadata?.avatar_url} />
                     <AvatarFallback className="bg-gradient-to-br from-yellow-400 to-amber-500 text-white text-2xl font-bold">
                       {getInitials(user.email || '')}
                     </AvatarFallback>
                   </Avatar>
-                  
-                  {/* Hidden file input */}
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleAvatarUpload}
-                    className="hidden"
-                  />
-                  
                   <Button
                     size="icon"
-                    onClick={triggerFileInput}
-                    disabled={uploadingAvatar}
-                    className="absolute bottom-2 right-2 bg-yellow-500 hover:bg-yellow-600 disabled:bg-gray-400 disabled:cursor-not-allowed rounded-full w-8 h-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute bottom-2 right-2 bg-yellow-500 hover:bg-yellow-600 rounded-full w-8 h-8 opacity-0 group-hover:opacity-100 transition-opacity"
                   >
-                    {uploadingAvatar ? (
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    ) : (
-                      <Camera className="w-4 h-4" />
-                    )}
+                    <Camera className="w-4 h-4" />
                   </Button>
                 </div>
 
@@ -556,16 +244,13 @@ const Profile = () => {
           </Card>
 
           {/* Profile Tabs */}
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-5 bg-slate-800/50 border border-slate-700">
+          <Tabs defaultValue="overview" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-4 bg-slate-800/50 border border-slate-700">
               <TabsTrigger value="overview" className="text-white data-[state=active]:bg-yellow-500 data-[state=active]:text-black">
                 Огляд
               </TabsTrigger>
               <TabsTrigger value="tickets" className="text-white data-[state=active]:bg-yellow-500 data-[state=active]:text-black">
                 Квитки
-              </TabsTrigger>
-              <TabsTrigger value="listings" className="text-white data-[state=active]:bg-yellow-500 data-[state=active]:text-black">
-                Ваші оголошення
               </TabsTrigger>
               <TabsTrigger value="wallet" className="text-white data-[state=active]:bg-yellow-500 data-[state=active]:text-black">
                 Гаманець
@@ -665,198 +350,6 @@ const Profile = () => {
               </Card>
             </TabsContent>
 
-            {/* Listings Tab */}
-            <TabsContent value="listings">
-              <Card className="bg-slate-800/50 border-slate-700">
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle className="text-white flex items-center gap-2">
-                        <Package className="w-5 h-5" />
-                        Ваші оголошення
-                      </CardTitle>
-                      <CardDescription className="text-slate-400">
-                        Додавайте та керуйте своїми товарами
-                      </CardDescription>
-                    </div>
-                    <Button
-                      onClick={() => setShowAddListing(!showAddListing)}
-                      className="bg-yellow-500 hover:bg-yellow-600 text-black"
-                    >
-                      <Plus className="w-4 h-4 mr-2" />
-                      Додати товар
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {/* Add/Edit Listing Form */}
-                  {showAddListing && (
-                    <Card className="bg-slate-700/50 border-slate-600">
-                      <CardHeader>
-                        <CardTitle className="text-white text-lg">
-                          {editingListing ? 'Редагувати оголошення' : 'Додати новий товар'}
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div>
-                          <Label htmlFor="listing-title" className="text-white">Назва товару *</Label>
-                          <Input
-                            id="listing-title"
-                            value={listingForm.title}
-                            onChange={(e) => setListingForm(prev => ({ ...prev, title: e.target.value }))}
-                            placeholder="Наприклад: iPhone 15 Pro Max"
-                            className="bg-slate-600 border-slate-500 text-white"
-                          />
-                        </div>
-
-                        <div>
-                          <Label htmlFor="listing-category" className="text-white">Категорія *</Label>
-                          <Select 
-                            value={listingForm.category} 
-                            onValueChange={(value) => setListingForm(prev => ({ ...prev, category: value }))}
-                          >
-                            <SelectTrigger className="bg-slate-600 border-slate-500 text-white">
-                              <SelectValue placeholder="Оберіть категорію" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="Нерухомість">Нерухомість</SelectItem>
-                              <SelectItem value="Транспорт">Транспорт</SelectItem>
-                              <SelectItem value="Електроніка">Електроніка</SelectItem>
-                              <SelectItem value="Смартфони">Смартфони</SelectItem>
-                              <SelectItem value="Ювелірні вироби">Ювелірні вироби</SelectItem>
-                              <SelectItem value="Косметика">Косметика</SelectItem>
-                              <SelectItem value="Дитячі товари">Дитячі товари</SelectItem>
-                              <SelectItem value="Спорт">Спорт</SelectItem>
-                              <SelectItem value="Інструменти">Інструменти</SelectItem>
-                              <SelectItem value="Туризм">Туризм</SelectItem>
-                              <SelectItem value="Подарунки">Подарунки</SelectItem>
-                              <SelectItem value="Послуги">Послуги</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-
-                        <div>
-                          <Label htmlFor="listing-price" className="text-white">Ціна (₴) *</Label>
-                          <Input
-                            id="listing-price"
-                            type="number"
-                            value={listingForm.price}
-                            onChange={(e) => setListingForm(prev => ({ ...prev, price: e.target.value }))}
-                            placeholder="0.00"
-                            className="bg-slate-600 border-slate-500 text-white"
-                          />
-                        </div>
-
-                        <div>
-                          <Label htmlFor="listing-description" className="text-white">Опис</Label>
-                          <Textarea
-                            id="listing-description"
-                            value={listingForm.description}
-                            onChange={(e) => setListingForm(prev => ({ ...prev, description: e.target.value }))}
-                            placeholder="Детальний опис товару..."
-                            className="bg-slate-600 border-slate-500 text-white min-h-[100px]"
-                          />
-                        </div>
-
-                        <div>
-                          <Label htmlFor="listing-image" className="text-white">Зображення товару</Label>
-                          <div className="flex items-center gap-2">
-                            <input
-                              ref={listingImageRef}
-                              id="listing-image"
-                              type="file"
-                              accept="image/*"
-                              onChange={handleListingImageChange}
-                              className="hidden"
-                            />
-                            <Button
-                              type="button"
-                              onClick={() => listingImageRef.current?.click()}
-                              variant="outline"
-                              className="bg-slate-600 border-slate-500 text-white hover:bg-slate-500"
-                            >
-                              <Upload className="w-4 h-4 mr-2" />
-                              {listingForm.image ? listingForm.image.name : 'Вибрати файл'}
-                            </Button>
-                          </div>
-                        </div>
-
-                        <div className="flex gap-2">
-                          <Button
-                            onClick={handleSaveListing}
-                            disabled={uploadingListing}
-                            className="bg-green-600 hover:bg-green-700 text-white"
-                          >
-                            {uploadingListing ? 'Збереження...' : editingListing ? 'Зберегти зміни' : 'Додати оголошення'}
-                          </Button>
-                          <Button
-                            onClick={resetListingForm}
-                            variant="outline"
-                            className="border-slate-600 text-white hover:bg-slate-700"
-                          >
-                            Скасувати
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
-
-                  {/* Listings Grid */}
-                  {listings.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {listings.map((listing) => (
-                        <Card key={listing.id} className="bg-slate-700/50 border-slate-600">
-                          <CardContent className="p-4">
-                            {listing.image && (
-                              <img 
-                                src={listing.image} 
-                                alt={listing.title}
-                                className="w-full h-48 object-cover rounded-lg mb-3"
-                              />
-                            )}
-                            <div className="space-y-2">
-                              <div className="flex items-start justify-between">
-                                <h4 className="text-white font-semibold text-lg">{listing.title}</h4>
-                                <Badge className="bg-yellow-500 text-black">{listing.category}</Badge>
-                              </div>
-                              {listing.description && (
-                                <p className="text-slate-400 text-sm line-clamp-2">{listing.description}</p>
-                              )}
-                              <div className="flex items-center justify-between pt-2">
-                                <span className="text-green-400 font-bold text-xl">{listing.price} ₴</span>
-                                <div className="flex gap-2">
-                                  <Button
-                                    size="icon"
-                                    onClick={() => handleEditListing(listing)}
-                                    className="bg-blue-600 hover:bg-blue-700"
-                                  >
-                                    <Pencil className="w-4 h-4" />
-                                  </Button>
-                                  <Button
-                                    size="icon"
-                                    onClick={() => handleDeleteListing(listing.id)}
-                                    className="bg-red-600 hover:bg-red-700"
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                  </Button>
-                                </div>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  ) : !showAddListing ? (
-                    <div className="text-center py-12 text-slate-400">
-                      <Package className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                      <p className="text-lg">У вас поки немає оголошень</p>
-                      <p className="text-sm">Натисніть кнопку "Додати товар" щоб створити перше оголошення</p>
-                    </div>
-                  ) : null}
-                </CardContent>
-              </Card>
-            </TabsContent>
-
             {/* Wallet Tab */}
             <TabsContent value="wallet">
               <Card className="bg-slate-800/50 border-slate-700">
@@ -873,10 +366,7 @@ const Profile = () => {
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Button 
-                      onClick={() => setActiveTab('wallet')}
-                      className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold py-6"
-                    >
+                    <Button className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold py-6">
                       <CreditCard className="w-5 h-5 mr-2" />
                       Поповнити рахунок
                     </Button>

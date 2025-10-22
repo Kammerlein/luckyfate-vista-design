@@ -1,28 +1,11 @@
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Sparkles, Gift, Wallet } from 'lucide-react';
+import { Sparkles, Gift } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
-import { User } from '@supabase/supabase-js';
 
 const HeroSection = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState<User | null>(null);
-
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setUser(session?.user ?? null);
-      }
-    );
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
   return (
     <section className="relative min-h-[80vh] bg-gradient-to-br from-teal-900 via-teal-800 to-emerald-800 overflow-hidden">
       {/* Animated Background Elements */}
@@ -58,13 +41,13 @@ const HeroSection = () => {
             </Button>
             
             <Button 
-              onClick={() => user ? navigate('/profile?tab=wallet') : navigate('/auth?tab=signup')}
+              onClick={() => navigate('/auth')}
               size="lg" 
               variant="outline" 
               className="border-2 border-white text-slate-800 hover:bg-white hover:text-teal-800 px-8 py-4 text-lg font-semibold rounded-full shadow-2xl transform hover:scale-110 transition-all duration-300 backdrop-blur-sm"
             >
-              {user ? <Wallet className="w-5 h-5 mr-2" /> : <Gift className="w-5 h-5 mr-2" />}
-              {user ? 'Поповнити рахунок' : 'Приєднатися зараз'}
+              <Gift className="w-5 h-5 mr-2" />
+              Приєднатися зараз
             </Button>
           </div>
 
