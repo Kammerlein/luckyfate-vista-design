@@ -14,8 +14,8 @@ export const LotteryPromptDialog = ({ open, onOpenChange }: LotteryPromptDialogP
         className="bg-gradient-to-br from-slate-800 to-teal-800 border-2 border-yellow-400 text-white shadow-2xl animate-slide-in-from-bottom-right"
         style={{
           position: 'fixed',
-          bottom: '2rem',
-          right: '2rem',
+          bottom: '8rem',
+          right: '4rem',
           top: 'auto',
           left: 'auto',
           transform: 'none',
