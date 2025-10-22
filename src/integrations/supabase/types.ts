@@ -7,13 +7,37 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.12 (cd3cf9e)"
   }
   public: {
     Tables: {
+      categories: {
+        Row: {
+          category_name: string
+          category_number: number
+          created_at: string | null
+          products_count: number | null
+          site_percentage: number
+        }
+        Insert: {
+          category_name: string
+          category_number: number
+          created_at?: string | null
+          products_count?: number | null
+          site_percentage?: number
+        }
+        Update: {
+          category_name?: string
+          category_number?: number
+          created_at?: string | null
+          products_count?: number | null
+          site_percentage?: number
+        }
+        Relationships: []
+      }
       lotteries: {
         Row: {
           category: string
@@ -124,6 +148,45 @@ export type Database = {
           },
         ]
       }
+      user_listings: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          image: string | null
+          price: number
+          status: Database["public"]["Enums"]["listing_status"]
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image?: string | null
+          price: number
+          status?: Database["public"]["Enums"]["listing_status"]
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image?: string | null
+          price?: number
+          status?: Database["public"]["Enums"]["listing_status"]
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -132,7 +195,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      listing_status: "active" | "archived" | "deleted"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -259,6 +322,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      listing_status: ["active", "archived", "deleted"],
+    },
   },
 } as const

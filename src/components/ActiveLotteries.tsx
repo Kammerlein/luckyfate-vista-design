@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Clock, Users, Ticket } from 'lucide-react';
+import { Users, Ticket } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useTicketPurchase } from '@/hooks/useTicketPurchase';
 
@@ -47,16 +47,6 @@ const ActiveLotteries = () => {
     fetchLotteries();
   }, []);
 
-  const calculateTimeLeft = (endTime: string) => {
-    const difference = +new Date(endTime) - +new Date();
-    if (difference > 0) {
-      const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
-      const minutes = Math.floor((difference / 1000 / 60) % 60);
-      return `${days}д ${hours}г ${minutes}хв`;
-    }
-    return 'Завершено';
-  };
 
   const handlePurchaseTicket = async (lottery: Lottery) => {
     await purchaseTicket({
@@ -110,10 +100,6 @@ const ActiveLotteries = () => {
                   <span className="bg-teal-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
                     {lottery.category}
                   </span>
-                </div>
-                <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm font-semibold flex items-center">
-                  <Clock className="w-4 h-4 mr-1" />
-                  {calculateTimeLeft(lottery.end_time)}
                 </div>
               </div>
 
