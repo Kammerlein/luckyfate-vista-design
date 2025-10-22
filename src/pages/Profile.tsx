@@ -15,6 +15,7 @@ import { toast } from 'sonner';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { LotteryPromptDialog } from '@/components/LotteryPromptDialog';
 
 interface UserProfile {
   balance: number;
@@ -67,6 +68,7 @@ const Profile = () => {
   });
   const [uploadingListing, setUploadingListing] = useState(false);
   const listingImageRef = useRef<HTMLInputElement>(null);
+  const [showLotteryPrompt, setShowLotteryPrompt] = useState(false);
   
   // Get tab from URL parameter, default to 'overview'
   const tabFromUrl = searchParams.get('tab') || 'overview';
@@ -374,6 +376,11 @@ const Profile = () => {
 
         setListings(prev => [data, ...prev]);
         toast.success('Оголошення додано!');
+        
+        // Show lottery prompt dialog after adding a listing
+        setTimeout(() => {
+          setShowLotteryPrompt(true);
+        }, 1000);
       }
 
       resetListingForm();
@@ -930,6 +937,12 @@ const Profile = () => {
           </Tabs>
         </div>
       </div>
+
+      {/* Lottery Prompt Dialog */}
+      <LotteryPromptDialog 
+        open={showLotteryPrompt} 
+        onOpenChange={setShowLotteryPrompt}
+      />
     </div>
   );
 };
