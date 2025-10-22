@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Wallet, User, Home, Ticket, Trophy, LogOut, LogIn, Archive } from 'lucide-react';
+import { Wallet, User, Chrome as Home, Ticket, Trophy, LogOut, LogIn, Archive } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
