@@ -534,7 +534,7 @@ const Profile = () => {
                   <p className="text-slate-300 mb-4">{user.email}</p>
                   
                   <div className="flex flex-wrap gap-2 justify-center md:justify-start">
-                    <Badge className="bg-gradient-to-r from-yellow-500 to-amber-500 text-white">
+                    <Badge className="bg-gradient-to-r from-yellow-700 to-sky-500 text-white">
                       Активний гравець
                     </Badge>
                     <Badge variant="outline" className="border-teal-400 text-teal-400">
