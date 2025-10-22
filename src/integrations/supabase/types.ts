@@ -189,10 +189,55 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      public_listings: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          description: string | null
+          id: string | null
+          image: string | null
+          price: number | null
+          status: Database["public"]["Enums"]["listing_status"] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          image?: string | null
+          price?: number | null
+          status?: Database["public"]["Enums"]["listing_status"] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          image?: string | null
+          price?: number | null
+          status?: Database["public"]["Enums"]["listing_status"] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
-      [_ in never]: never
+      generate_ticket_number: { Args: never; Returns: string }
+      purchase_ticket: {
+        Args: { p_lottery_id: string; p_price: number }
+        Returns: {
+          error_message: string
+          new_balance: number
+          success: boolean
+          ticket_id: string
+          ticket_number: string
+        }[]
+      }
     }
     Enums: {
       listing_status: "active" | "archived" | "deleted"
