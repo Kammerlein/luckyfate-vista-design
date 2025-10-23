@@ -30,18 +30,18 @@ export const LotteryPromptDialog = ({ open, onOpenChange }: LotteryPromptDialogP
         <DialogHeader className="space-y-3">
           <DialogTitle className="text-2xl font-bold flex items-center gap-2 text-yellow-400">
             <Sparkles className="w-6 h-6 animate-pulse" />
-            Створіть лотерею з вашого товару!
+            Організуйте розіграш Вашого товару!
           </DialogTitle>
           <DialogDescription className="text-slate-200 text-base leading-relaxed">
             <div className="space-y-3">
               <p className="flex items-start gap-2">
                 <Gift className="w-5 h-5 text-yellow-400 mt-1 flex-shrink-0" />
                 <span>
-                  Ви можете розмістити цей товар у розділі <span className="font-semibold text-yellow-400">"Активні лотереї"</span> як лот!
+                  Ви можете розмістити цей товар у розділі <span className="font-semibold text-yellow-400">"Активні промо-розіграші"</span> як лот!
                 </span>
               </p>
               <p className="pl-7 text-sm">
-                Учасники купуватимуть квитки на ваш товар, а після завершення лотереї визначиться щасливчик, 
+                Учасники купуватимуть квитки на ваш товар, а після завершення розіграшу визначиться щасливчик, 
                 який отримає ваш товар у подарунок.
               </p>
               <p className="pl-7 text-sm font-semibold text-green-400">
