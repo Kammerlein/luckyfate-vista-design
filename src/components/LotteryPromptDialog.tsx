@@ -59,7 +59,7 @@ export const LotteryPromptDialog = ({ open, onOpenChange }: LotteryPromptDialogP
             className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
           >
             <Sparkles className="w-4 h-4 mr-2" />
-            Створити лотерею
+            Створити розіграш
           </Button>
           <Button
             onClick={() => onOpenChange(false)}
