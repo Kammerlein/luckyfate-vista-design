@@ -1,6 +1,7 @@
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Gift, Sparkles } from "lucide-react";
+import { Gift, Sparkles, X, Info, TrendingUp } from "lucide-react";
 
 interface LotteryPromptDialogProps {
   open: boolean;
@@ -8,68 +9,116 @@ interface LotteryPromptDialogProps {
 }
 
 export const LotteryPromptDialog = ({ open, onOpenChange }: LotteryPromptDialogProps) => {
+  const [showBenefits, setShowBenefits] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      const timer = setTimeout(() => setShowBenefits(true), 300);
+      return () => clearTimeout(timer);
+    } else {
+      setShowBenefits(false);
+    }
+  }, [open]);
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent 
-        className="bg-gradient-to-br from-slate-800 to-teal-800 border-2 border-yellow-400 text-white shadow-2xl animate-slide-in-from-bottom-right"
-        style={{
-          position: 'fixed',
-          bottom: '8rem',
-          right: '4rem',
-          top: 'auto',
-          left: 'auto',
-          transform: 'none',
-          width: '40vw',
-          height: '30vh',
-          maxWidth: '600px',
-          minWidth: '320px',
-          maxHeight: '400px',
-          minHeight: '250px',
-        }}
-      >
-        <DialogHeader className="space-y-3">
-          <DialogTitle className="text-2xl font-bold flex items-center gap-2 text-yellow-400">
-            <Sparkles className="w-6 h-6 animate-pulse" />
-            Організуйте розіграш Вашого товару!
-          </DialogTitle>
-          <DialogDescription className="text-slate-200 text-base leading-relaxed">
-            <div className="space-y-3">
-              <p className="flex items-start gap-2">
-                <Gift className="w-5 h-5 text-yellow-400 mt-1 flex-shrink-0" />
-                <span>
-                  Ви можете розмістити цей товар у розділі <span className="font-semibold text-yellow-400">"Активні промо-розіграші"</span> як лот!
-                </span>
-              </p>
-              <p className="pl-7 text-sm">
-                Учасники купуватимуть квитки на ваш товар, а після завершення розіграшу визначиться щасливчик, 
-                який отримає ваш товар у подарунок.
-              </p>
-              <p className="pl-7 text-sm font-semibold text-green-400">
-                Ви отримаєте гроші за свій товар після визначення переможця!
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          initial={{ opacity: 0, y: -100 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -100 }}
+          transition={{ type: "spring", damping: 20, stiffness: 300 }}
+          className="fixed top-20 left-4 right-4 z-40 max-w-md mx-auto"
+        >
+          <div className="bg-gradient-to-r from-cyan-400/10 to-indigo-400/10 backdrop-blur-xl border border-cyan-400/30 rounded-2xl p-4 shadow-2xl">
+            <div className="flex justify-between items-start mb-3">
+              <div className="flex items-center space-x-2">
+                <Info className="w-5 h-5 text-cyan-400" />
+                <h3 className="text-sm font-semibold text-cyan-400">
+                  Організуйте розіграш!
+                </h3>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onOpenChange(false)}
+                className="text-gray-400 hover:text-white p-1 h-auto"
+                aria-label="Закрити"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+            
+            <div className="space-y-3 text-sm text-gray-300">
+              <div className="flex items-start justify-between gap-2">
+                <p className="flex-1">
+                  Ви можете розмістити цей товар у розділі{" "}
+                  <span className="font-semibold text-yellow-400">"Активні промо-розіграші"</span> як лот!
+                </p>
+                <div 
+                  className="w-2 h-2 rounded-full flex-shrink-0 mt-1.5 bg-green-400 shadow-[0_0_8px_rgba(74,222,128,0.5)]"
+                  title="Функція доступна"
+                />
+              </div>
+              
+              <AnimatePresence>
+                {showBenefits && (
+                  <motion.div 
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="space-y-2"
+                  >
+                    <div className="bg-yellow-500/10 border border-yellow-400/30 rounded-lg p-2">
+                      <p className="text-xs text-yellow-400 flex items-start gap-2">
+                        <Gift className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                        <span>
+                          Учасники купуватимуть квитки на лот вашого товару, а після завершення конкурсу визначиться щасливчик
+                        </span>
+                      </p>
+                    </div>
+
+                    <div className="bg-green-500/10 border border-green-400/30 rounded-lg p-2">
+                      <p className="text-xs text-green-400 flex items-start gap-2">
+                        <TrendingUp className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                        <span className="font-semibold">
+                          Ви отримаєте гроші за свій товар після визначення переможця!
+                        </span>
+                      </p>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+              
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  onClick={() => onOpenChange(false)}
+                  variant="outline"
+                  className="text-gray-200 border-gray-600 hover:bg-cyan-400/10 hover:border-cyan-400 transition-colors"
+                >
+                  Пізніше
+                </Button>
+                
+                <Button
+                  onClick={() => {
+                    // TODO: Navigate to lottery creation
+                    onOpenChange(false);
+                  }}
+                  className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white transition-all"
+                >
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Створити розіграш
+                </Button>
+              </div>
+              
+              <p className="text-xs text-gray-400 text-center">
+                🎁 Перетворіть ваш товар на захоплюючий лот конкурса і отримайте свої кошти
               </p>
             </div>
-          </DialogDescription>
-        </DialogHeader>
-        <div className="flex gap-3 mt-4">
-          <Button
-            onClick={() => {
-              // TODO: Navigate to lottery creation
-              onOpenChange(false);
-            }}
-            className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
-          >
-            <Sparkles className="w-4 h-4 mr-2" />
-            Створити розіграш
-          </Button>
-          <Button
-            onClick={() => onOpenChange(false)}
-            variant="outline"
-            className="border-slate-400 text-slate-300 hover:bg-slate-700"
-          >
-            Пізніше
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
