@@ -8,6 +8,8 @@ import { Eye, EyeOff, ArrowLeft, Mail, Lock, User, Trophy } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { authSchema } from '@/lib/validation';
+import { z } from 'zod';
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -45,6 +47,23 @@ const Auth = () => {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+
+    // Validate input with Zod
+    const validation = authSchema.safeParse({
+      email: formData.email,
+      password: formData.password,
+      name: formData.name || ''
+    });
+
+    if (!validation.success) {
+      toast({
+        title: 'Помилка валідації',
+        description: validation.error.errors[0].message,
+        variant: 'destructive'
+      });
+      setIsLoading(false);
+      return;
+    }
 
     try {
       const { error } = await supabase.auth.signUp({
@@ -85,6 +104,25 @@ const Auth = () => {
     e.preventDefault();
     setIsLoading(true);
 
+    // Validate input with Zod
+    const signInValidation = authSchema.pick({ 
+      email: true, 
+      password: true 
+    }).safeParse({
+      email: formData.email,
+      password: formData.password
+    });
+
+    if (!signInValidation.success) {
+      toast({
+        title: 'Помилка валідації',
+        description: signInValidation.error.errors[0].message,
+        variant: 'destructive'
+      });
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email: formData.email,
@@ -116,11 +154,14 @@ const Auth = () => {
   };
 
   const handleForgotPassword = async () => {
-    if (!formData.email) {
+    // Validate email with Zod
+    const emailValidation = z.string().email("Невірний формат email").safeParse(formData.email);
+
+    if (!emailValidation.success) {
       toast({
-        title: "Введіть email",
-        description: "Спочатку введіть вашу електронну адресу",
-        variant: "destructive"
+        title: 'Невірний email',
+        description: 'Введіть коректну електронну адресу',
+        variant: 'destructive'
       });
       return;
     }
